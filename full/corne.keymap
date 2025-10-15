@@ -1,0 +1,215 @@
+/* vim: filetype=c
+ * Copyright (c) 2020, 2023 The ZMK Contributors, Jonathan Wright
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+#include <behaviors.dtsi>
+#include <dt-bindings/zmk/keys.h>
+#include <dt-bindings/zmk/bt.h>
+#include <dt-bindings/zmk/outputs.h>
+
+// Prepare the Layers
+#define BASE 0
+#define SYMBOLS 1
+#define NUMBERS 2
+#define FUNCTIONS 3
+#define MEDIA 4
+#define SYSTEM 5
+#define MOVE 6
+
+// TAP_DANCE settings
+#define TAP_SPEED 200
+
+&sk {
+  release-after-ms = <2000>;
+  quick-release;
+};
+
+&mt {
+  tapping-term-ms = <400>;
+  retro-tap;
+};
+
+&soft_off {
+    hold-time-ms = <2000>;
+};
+
+/ {
+
+  behaviors {
+    ms: mod_sticky {
+      compatible = "zmk,behavior-hold-tap";
+      #binding-cells = <2>;
+      flavor = "hold-preferred";
+      tapping-term-ms = <200>;
+      bindings = <&mo>, <&sl>;
+    };
+
+    kpt: kp_toggle {
+      compatible = "zmk,behavior-hold-tap";
+      #binding-cells = <2>;
+      flavor = "hold-preferred";
+      tapping-term-ms = <200>;
+      bindings = <&kp>, <&tog>;
+    };
+
+    squote: single_double_quote {
+      compatible = "zmk,behavior-mod-morph";
+      #binding-cells = <0>;
+      bindings = <&kp SINGLE_QUOTE>, <&kp DOUBLE_QUOTES>;
+      mods = <(MOD_LSFT|MOD_RSFT)>;
+    };
+
+     backspace: backspace_delete {
+      compatible = "zmk,behavior-mod-morph";
+      #binding-cells = <0>;
+      bindings = <&kp BACKSPACE>, <&kp DELETE>;
+      mods = <(MOD_LSFT|MOD_RSFT)>;
+    };
+  };
+
+  combos {
+    compatible = "zmk,combos";
+
+    // Power off the left-hand keyboard
+    left_soft_off {
+      timeout-ms = <100>;
+      layers = <0>; // limit to the BASE layer
+      key-positions = <37 38 39>;
+      bindings = <&soft_off>;
+    };
+
+    // Power off the right-hand keyboard
+    right_soft_off {
+      timeout-ms = <100>;
+      layers = <0>; // limit to the BASE layer
+      key-positions = <40 41 42>;
+      bindings = <&soft_off>;
+    };
+  };
+
+  keymap {
+    compatible = "zmk,keymap";
+
+    // ╭────┬────┬────┬────┬────┬────╮ ╭────┬────┬────┬────┬────┬────╮
+    // │ 01 │ 02 │ 03 │ 04 │ 05 │ 06 │ │ 07 │ 08 │ 09 │ 10 │ 11 │ 12 │
+    // ├────┼────┼────┼────┼────┼────┤ ├────┼────┼────┼────┼────┼────┤
+    // │ 13 │ 14 │ 15 │ 16 │ 17 │ 18 │ │ 19 │ 20 │ 21 │ 22 │ 23 │ 24 │
+    // ├────┼────┼────┼────┼────┼────┤ ├────┼────┼────┼────┼────┼────┤
+    // │ 25 │ 26 │ 27 │ 28 │ 29 │ 30 │ │ 31 │ 32 │ 33 │ 34 │ 35 │ 36 │
+    // ╰────┴────┴────┼────┼────┼────┤ ├────┼────┼────┼────┴────┴────╯
+    //                │ 37 │ 38 │ 39 │ │ 40 │ 41 │ 42 │
+    //                ╰────┴────┴────╯ ╰────┴────┴────╯
+
+    default_layer {
+      label = "base";
+      bindings = <
+        // ╭─────────────────────────┬───────┬───────┬───────┬─────────────────┬───────╮ ╭───────┬─────────────┬───────────┬────────────┬───────────────┬──────────────────╮
+             &kp TAB                   &kp Q   &kp W   &kp E   &kp R             &kp T     &kp Y   &kp U         &kp I       &kp O        &kp P           &backspace
+        // ├─────────────────────────┼───────┼───────┼───────┼─────────────────┼───────┤ ├───────┼─────────────┼───────────┼────────────┼───────────────┼──────────────────┤
+             &mt LEFT_CONTROL ESCAPE   &kp A   &kp S   &kp D   &lt FUNCTIONS F   &kp G     &kp H   &kp J         &kp K       &kp L        &kp SEMICOLON   &squote
+        // ├─────────────────────────┼───────┼───────┼───────┼─────────────────┼───────┤ ├───────┼─────────────┼───────────┼────────────┼───────────────┼──────────────────┤
+             &kp LEFT_SHIFT            &kp Z   &kp X   &kp C   &kp V             &kp B     &kp N   &lt M MEDIA   &kp COMMA   &kp PERIOD   &kp SLASH       &kp RIGHT_SHIFT
+        // ╰─────────────────┬───────┴───────┴───────┼───────┴─────────────┬───┴───────┤ ├───────┴────────┬────┴───────────┴────┬───────┴─────────────┬─┴──────────────────╯
+                               &kpt LEFT_META SYSTEM   &ms NUMBERS NUMBERS   &kp SPACE     &lt MOVE ENTER   &ms SYMBOLS SYMBOLS   &kpt LEFT_ALT MEDIA
+        //                   ╰───────────────────────┴─────────────────────┴───────────╯ ╰────────────────┴─────────────────────┴─────────────────────╯
+      >;
+    };
+
+    symbols_layer { // right modifier
+      label = "symbols";
+      bindings = <
+        //                                                           HASH is £
+        // ╭──────────────────┬──────────────────────┬─────────────┬─────────────────┬────────────┬─────────────╮ ╭─────────────────┬───────────────┬──────────────────────┬──────────────────────┬───────────┬───────────────────╮
+             &kp TAB            &kp EXCLAMATION        &kp AT_SIGN   &kp HASH          &kp DOLLAR   &kp PERCENT     &kp CARET         &kp AMPERSAND   &kp LEFT_PARENTHESIS   &kp RIGHT_PARENTHESIS  &kp PLUS    &kp GRAVE
+        // ├──────────────────┼──────────────────────┼─────────────┼─────────────────┼────────────┼─────────────┤ ├─────────────────┼───────────────┼──────────────────────┼──────────────────────┼───────────┼───────────────────┤
+        //                                                                                                          NON_US_HASH is #
+             &kp LEFT_CONTROL   &kp PIPE               &none         &none             &none        &none           &kp NON_US_HASH   &kp ASTERISK    &kp LEFT_BRACE         &kp RIGHT_BRACE        &kp MINUS   &kp DOUBLE_QUOTES
+        // ├──────────────────┼──────────────────────┼─────────────┼─────────────────┼────────────┼─────────────┤ ├─────────────────┼───────────────┼──────────────────────┼──────────────────────┼───────────┼───────────────────┤
+        //                                                                                          PIPE is ~ for UK keyboards
+             &kp LEFT_SHIFT     &kp NON_US_BACKSLASH   &none         &none             &none        &kp PIPE        &kp UNDERSCORE    &kp EQUAL       &kp LEFT_BRACKET       &kp RIGHT_BRACKET      &kp SLASH   &trans
+        // ╰──────────────────┴──────────────────────┴─────────────┴────────┬────────┴──────┬─────┴────┬────────┤ ├────────┬────────┴─┬─────────────┴─┬────────────────────┴──────────────────────┴───────────┴───────────────────╯
+                                                                              &kp LEFT_META   &to BASE   &trans     &trans   &to BASE   &kp LEFT_ALT
+        //                                                                  ╰───────────────┴──────────┴────────╯ ╰────────┴──────────┴──────────────╯
+      >;
+    };
+
+    numbers_layer {
+      label = "numbers";
+      bindings = <
+        // ╭──────────────────┬────────┬────────┬────────┬────────┬────────╮ ╭──────────┬───────────────┬─────────────┬───────────┬────────┬────────╮
+             &kp TAB            &kp N1   &kp N2   &kp N3   &kp N4   &kp N5     &kp N6     &kp N7          &kp N8        &kp N9      &kp N0   &trans
+        // ├──────────────────┼────────┼────────┼────────┼────────┼────────┤ ├──────────┼───────────────┼─────────────┼───────────┼────────┼────────┤
+             &kp LEFT_CONTROL   &none    &none    &none    &none    &none      &kp LEFT   &kp DOWN        &kp UP        &kp RIGHT   &none    &none
+        // ├──────────────────┼────────┼────────┼────────┼────────┼────────┤ ├──────────┼───────────────┼─────────────┼───────────┼────────┼────────┤
+             &kp LEFT_SHIFT     &none    &none    &none    &none    &none      &none      &kp PAGE_DOWN   &kp PAGE_UP   &none       &none    &trans
+        // ╰──────────────────┴────────┼────────┴──────┬─┴────────┼────────┤ ├────────┬──┴───────┬──────┴───────┬─────┴───────────┴────────┴────────╯
+                                         &kp LEFT_META   &to BASE   &trans     &trans   &to BASE   &kp LEFT_ALT
+        //                             ╰───────────────┴──────────┴────────╯ ╰────────┴──────────┴──────────────╯
+
+      >;
+    };
+
+    functions_layer {
+      label = "numbers";
+      bindings = <
+        // ╭──────────────────┬────────┬────────┬────────┬────────┬────────╮ ╭────────┬────────┬────────┬─────────┬─────────┬─────────╮
+             &kp F1             &kp F2   &kp F3   &kp F4   &kp F5   &kp F6     &kp F7   &kp F8   &kp F9   &kp F10   &kp F11   &kp F12
+        // ├──────────────────┼────────┼────────┼────────┼────────┼────────┤ ├────────┼────────┼────────┼─────────┼─────────┼─────────┤
+             &kp LEFT_CONTROL   &none    &none    &none    &none    &none      &none    &none    &none    &none     &none     &none
+        // ├──────────────────┼────────┼────────┼────────┼────────┼────────┤ ├─────────────────┼────────┼─────────┼─────────┼─────────┤
+             &kp LEFT_SHIFT     &none    &none    &none    &none    &none      &none    &none    &none    &none     &none     &trans
+        // ╰──────────────────┴────────┼────────┴──────┬─┴────────┼────────┤ ├────────┼────────┴─┬──────┴───────┬─┴─────────┴─────────╯
+                                         &kp LEFT_META   &to BASE   &trans     &trans   &to BASE   &kp LEFT_ALT
+        //                             ╰───────────────┴──────────┴────────╯ ╰────────┴──────────┴──────────────╯
+
+      >;
+    };
+
+    media_layer {
+      label = "media";
+      bindings = <
+        // ╭──────────────────┬───────┬─────────────────┬───────┬───────┬───────────────────────╮ ╭───────┬──────────────┬────────────────┬────────────┬──────────────────┬───────────────────╮
+             &none              &none   &none             &none   &none   &kp C_BRIGHTNESS_INC      &none   &none          &none            &kp C_STOP   &kp C_PLAY_PAUSE   &kp C_VOLUME_UP
+        // ├──────────────────┼───────┼─────────────────┼───────┼───────┼───────────────────────┤ ├───────┼──────────────┼────────────────┼────────────┼──────────────────┼───────────────────┤
+             &kp LEFT_CONTROL   &none   &kp PRINTSCREEN   &none   &none   &kp C_BRIGHTNESS_DEC      &none   &none          &none            &none        &none              &kp C_VOLUME_DOWN
+        // ├──────────────────┼───────┼─────────────────┼───────┼───────┼───────────────────────┤ ├───────┼──────────────┼────────────────┼────────────┼──────────────────┼───────────────────┤
+             &kp LEFT_SHIFT     &none   &none             &none   &none   &kp C_BRIGHTNESS_AUTO     &none   &kp C_REPEAT   &kp C_PREVIOUS   &kp C_NEXT   &kp C_SHUFFLE      &kp C_MUTE
+        // ├──────────────────┴───────┴─────────────────┴───┬───┴───────┴───┬──────────┬────────┤ ├───────┴┬─────────┬───┴────────────────┴─┬──────────┴──────────────────┴───────────────────╯
+                                                              &kp LEFT_META   &to BASE   &trans     &trans   &to BASE   &kpt LEFT_ALT MEDIA
+        //                                                  ╰───────────────┴──────────┴────────╯ ╰────────┴──────────┴─────────────────────╯
+      >;
+    };
+
+    system_layer {
+      label = "system";
+      bindings = <
+        // ╭────────────┬─────────────────┬─────────────────┬──────────────┬──────────────┬──────────────╮ ╭───────┬───────┬──────────────┬──────────────┬───────┬───────╮
+             &bt BT_NXT   &bt BT_SEL 0      &bt BT_SEL 1      &bt BT_SEL 2   &bt BT_SEL 3   &bt BT_SEL 4     &none   &none   &none          &none          &none   &none
+        // ├────────────┼─────────────────┼─────────────────┼──────────────┼──────────────┼──────────────┤ ├───────┼───────┼──────────────┼──────────────┼───────┼───────┤
+             &none        &none             &none             &none          &none          &bt BT_CLR       &none   &none   &none          &none          &none   &none
+        // ├────────────┼─────────────────┼─────────────────┼──────────────┼──────────────┼──────────────┤ ├───────┼───────┼──────────────┼──────────────┼───────┼───────┤
+             &none        &kp C_AL_LOCK     &kp C_AL_LOGOFF   &kp C_SLEEP    &kp C_POWER    &none            &none   &none   &out OUT_USB   &out OUT_BLE   &none   &none
+        // ╰────────────┴─────────────────┴─────────────────┴──────────────┴──────┬───────┴──────────────┤ ├───────┼───────┼───────┬──────┴──────────────┴───────┴───────╯
+                                                                         &to BASE   &none   &out OUT_TOG     &none   &none   &none
+        //                                                             ╰──────────┴───────┴──────────────╯ ╰───────┴───────┴───────╯
+      >;
+    };
+
+    move_layer {
+      label = "move";
+      bindings = <
+        // ╭───────┬───────┬───────┬───────┬───────┬───────╮ ╭───────────────┬──────────┬──────────┬───────────┬───────┬───────╮
+             &none   &none   &none   &none   &none   &none     &kp PAGE_UP     &kp HOME   &kp UP     &kp END     &none   &none
+        // ├───────┼───────┼───────┼───────┼───────┼───────┤ ├───────────────┼──────────┼──────────┼───────────┼───────┼───────┤
+             &none   &none   &none   &none   &none   &none     &kp PAGE_DOWN   &kp LEFT   &kp DOWN   &kp RIGHT   &none   &none
+        // ├───────┼───────┼───────┼──────────────┼────────┤ ├───────────────┼──────────┼──────────┼───────────┼───────┼───────┤
+             &none   &none   &none   &none   &none   &none     &none           &none      &none      &none       &none   &none
+        // ╰───────┴───────┴───────┼───────┼───────┼───────┤ ├───────┬───────┼───────┬──┴──────────┴───────────┴───────┴───────╯
+                                     &none   &none   &none     &none   &none   &none
+        //                         ╰───────┴───────┴───────╯ ╰───────┴───────┴───────╯
+      >;
+    };
+  };
+};
